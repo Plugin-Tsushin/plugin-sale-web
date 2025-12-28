@@ -161,15 +161,6 @@ html = '''<!DOCTYPE html>
             padding: 0 16px 40px;
         }
         
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
         /* フィルター */
         .filters {
             display: flex;
@@ -218,17 +209,10 @@ html = '''<!DOCTYPE html>
             gap: 16px;
             align-items: center;
             transition: all 0.2s;
-            border: 1px solid transparent;
         }
         
         .deal-card:hover {
             background: #1a1a24;
-            border-color: #2a2a3a;
-        }
-        
-        .deal-card-urgent {
-            border-left: 3px solid #ef4444;
-            background: linear-gradient(90deg, rgba(239,68,68,0.1) 0%, #14141c 30%);
         }
         
         .deal-info { min-width: 0; }
@@ -267,15 +251,9 @@ html = '''<!DOCTYPE html>
             color: #fff;
         }
         
-        .tag-urgent {
-            background: #ef4444;
+        .tag-days {
+            background: #374151;
             color: #fff;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
         }
         
         .deal-name {
@@ -325,13 +303,7 @@ html = '''<!DOCTYPE html>
         }
         
         .deal-end {
-            color: #666;
-            font-size: 13px;
-        }
-        
-        .deal-end-urgent {
-            color: #ef4444;
-            font-weight: 600;
+            color: #888;
             font-size: 13px;
         }
         
@@ -354,10 +326,6 @@ html = '''<!DOCTYPE html>
         .cta-btn:hover {
             background: #4a4ae0;
             transform: translateY(-1px);
-        }
-        
-        .cta-btn-urgent {
-            background: linear-gradient(90deg, #ef4444, #f59e0b);
         }
         
         /* FAQ */
@@ -535,20 +503,15 @@ html = '''<!DOCTYPE html>
             
             filtered.forEach(deal => {
                 const days = getDaysRemaining(deal.endDate);
-                const isUrgent = days <= 3;
                 
                 const card = document.createElement('div');
-                card.className = 'deal-card' + (isUrgent ? ' deal-card-urgent' : '');
+                card.className = 'deal-card';
                 
                 let tags = '<span class="tag tag-category">' + deal.categoryIcon + ' ' + deal.categoryLabel + '</span>';
                 if (deal.isPopular) tags += '<span class="tag tag-popular">定番</span>';
                 if (deal.isBeginner) tags += '<span class="tag tag-beginner">初心者向け</span>';
                 tags += '<span class="tag tag-discount">' + deal.discountPercent + '%OFF</span>';
-                if (isUrgent) tags += '<span class="tag tag-urgent">残り' + days + '日</span>';
-                
-                const endText = days <= 7 ? '残り' + days + '日' : deal.endDate.replace('Ends ', '');
-                const endClass = isUrgent ? 'deal-end-urgent' : 'deal-end';
-                const ctaClass = isUrgent ? 'cta-btn cta-btn-urgent' : 'cta-btn';
+                tags += '<span class="tag tag-days">残り' + days + '日</span>';
                 
                 card.innerHTML = 
                     '<div class="deal-info">' +
@@ -561,11 +524,11 @@ html = '''<!DOCTYPE html>
                                 '<span class="price-original">¥' + deal.originalPrice.toLocaleString() + '</span>' +
                             '</div>' +
                             '<span class="deal-savings">¥' + deal.savings.toLocaleString() + ' お得</span>' +
-                            '<span class="' + endClass + '">' + endText + '</span>' +
+                            '<span class="deal-end">残り' + days + '日</span>' +
                         '</div>' +
                     '</div>' +
                     '<div class="deal-action">' +
-                        '<a href="' + deal.productUrl + '" target="_blank" class="' + ctaClass + '">セール価格で購入</a>' +
+                        '<a href="' + deal.productUrl + '" target="_blank" class="cta-btn">セール価格で購入</a>' +
                     '</div>';
                 
                 container.appendChild(card);
