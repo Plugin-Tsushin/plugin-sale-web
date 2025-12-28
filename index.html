@@ -3,42 +3,396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>おすすめセールプラグイン 毎日更新</title>
+    <title>DTMプラグインセール情報 | 毎日自動更新</title>
+    <meta name="description" content="Plugin Boutiqueのお得なDTMプラグインセール情報を毎日自動更新。終了間近のセールを見逃さない！">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0f0f13;
+            --bg-secondary: #1a1a23;
+            --bg-card: #1e1e2a;
+            --bg-card-hover: #252533;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6b6b7b;
+            --border: #2a2a3a;
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0f; color: #e0e0e0; padding: 20px; }
-        h1 { text-align: center; margin-bottom: 20px; color: #fff; }
-        .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filter-btn { padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; transition: all 0.2s; background: #2a2a3a; color: #e0e0e0; }
-        .filter-btn:hover { background: #3a3a4a; }
-        .filter-btn.active { background: #6366f1; color: #fff; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
-        .card { background: #1a1a24; border-radius: 12px; overflow: hidden; transition: transform 0.2s; }
-        .card:hover { transform: translateY(-4px); }
-        .card img { width: 100%; height: 160px; object-fit: cover; }
-        .card-body { padding: 16px; }
-        .card-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #fff; }
-        .price { color: #10b981; font-size: 20px; font-weight: 700; }
-        .original { color: #666; text-decoration: line-through; font-size: 12px; margin-left: 8px; }
-        .discount { background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
-        .end-date { color: #f59e0b; font-size: 12px; margin-top: 8px; }
-        .btn { display: block; text-align: center; background: #6366f1; color: #fff; padding: 10px; border-radius: 8px; text-decoration: none; margin-top: 12px; }
-        .btn:hover { background: #818cf8; }
+        
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .filter-btn .count {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: var(--accent);
+        }
+        
+        .card-badges {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .badge-urgent {
+            background: var(--danger);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        .badge-hot {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+        }
+        
+        .badge-super {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: var(--bg-secondary);
+        }
+        
+        .card-image-placeholder {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        
+        .card-body {
+            padding: 16px;
+        }
+        
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .price-section {
+            margin-bottom: 12px;
+        }
+        
+        .price-current {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--success);
+        }
+        
+        .price-original {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            margin-left: 8px;
+        }
+        
+        .discount-tag {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+        
+        .savings {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .savings-icon {
+            font-size: 16px;
+        }
+        
+        .savings-text {
+            font-size: 13px;
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .end-date {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 14px;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        
+        .end-date-icon {
+            font-size: 14px;
+        }
+        
+        .end-date-text {
+            color: var(--text-secondary);
+        }
+        
+        .end-date-urgent {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        
+        .end-date-warning {
+            color: var(--warning);
+            font-weight: 600;
+        }
+        
+        .cta-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .cta-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .cta-btn-hot {
+            background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%);
+        }
+        
+        .cta-btn-hot:hover {
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        
+        @media (max-width: 640px) {
+            .header h1 { font-size: 22px; }
+            .grid { grid-template-columns: 1fr; }
+            .filters { gap: 6px; }
+            .filter-btn { padding: 8px 14px; font-size: 12px; }
+        }
     </style>
 </head>
 <body>
-    <h1>おすすめセールプラグイン 毎日更新</h1>
-    <div class="filters">
-        <button class="filter-btn active" data-filter="all">すべて</button>
-        <button class="filter-btn" data-filter="50">50%OFF以上</button>
-        <button class="filter-btn" data-filter="70">70%OFF以上</button>
-        <button class="filter-btn" data-filter="90">90%OFF以上</button>
-    </div>
-    <div class="grid" id="deals"></div>
-    <script>
-        const salesData = [{"name": "SSL Native Bus Compressor 2", "salePrice": 3272, "originalPrice": "\\25,661", "discount": "(87% off)", "discountPercent": 87, "endDate": "Ends 05 Jan", "productUrl": "https://www.pluginboutique.com/product/2-Effects/8-Compressor/8651-SSL-Native-Bus-Compressor-2?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/ptcoewpmu647n80vpv8gvuxwl3v3"}, {"name": "Trackspacer", "salePrice": 4994, "originalPrice": "\\10,161", "discount": "(50% off)", "discountPercent": 50, "endDate": "Ends 31 Dec", "productUrl": "https://www.pluginboutique.com/product/2-Effects/71-Dynamics-Processor/3259-Trackspacer?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/0hju24yntv1r401g5oalicu9gxgs"}, {"name": "Bloom Bass Groove Lite", "salePrice": 3272, "originalPrice": "\\4,994", "discount": "(34% off)", "discountPercent": 34, "endDate": "Ends 11 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/64-Virtual-Instruments/14167-Bloom-Bass-Groove-Lite?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/u69pt6rcvl03p8hnlfc0918m3xvp"}, {"name": "Plugin Boutique Serum Presets Bundle", "salePrice": 4994, "originalPrice": "\\17,050", "discount": "(70% off)", "discountPercent": 70, "endDate": "Ends 07 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/31-Synth-Presets/9747-Plugin-Boutique-Serum-Presets-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/zg1zjaudcw4j3mxzdajw6x7hucjr"}, {"name": "Melodyne 5 Assistant Limited Time Offer", "salePrice": 12744, "originalPrice": "\\42,711", "discount": "(70% off)", "discountPercent": 70, "endDate": "Ends 30 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/48-Audio-Editor/7687-Melodyne-5-Assistant-Limited-Time-Offer?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/wvc5hdqib0lgnzhdz42n2r4irbh2"}, {"name": "Melodyne 5 Studio Limited Time Offer", "salePrice": 47189, "originalPrice": "\\120,211", "discount": "(60% off)", "discountPercent": 60, "endDate": "Ends 30 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/48-Audio-Editor/7684-Melodyne-5-Studio-Limited-Time-Offer?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/e7e8id1gi5gx6yrpp1ibyejxe94c"}, {"name": "Plugin Boutique $69 Holiday 2025 Bundle", "salePrice": 11883, "originalPrice": "\\313,611", "discount": "(96% off)", "discountPercent": 96, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/97-Various-Category/16137-Plugin-Boutique-69-Holiday-2025-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/p0nntwp3r0fkuouzl4igu5mdkbwj"}, {"name": "Thenatan Full Bundle", "salePrice": 6717, "originalPrice": "\\311,376", "discount": "(97% off)", "discountPercent": 97, "endDate": "Ends 07 Jan", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/89-Complete-Collection/16253-Thenatan-Full-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/enluvkxl2aw3sgca1n1xguwpj7du"}, {"name": "ROYAL 2", "salePrice": 1550, "originalPrice": "\\20,494", "discount": "(92% off)", "discountPercent": 92, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/64-Virtual-Instruments/6257-ROYAL-2?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/jdr947y19gsak0b3b3gu68te4u91"}, {"name": "Oxford Inflator", "salePrice": 6544, "originalPrice": "\\26,867", "discount": "(75% off)", "discountPercent": 75, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/2-Effects/9-Limiter/492-Oxford-Inflator?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/stp07ligbgoqbbg86vpturpvodpn"}, {"name": "Melodyne 5 Essential", "salePrice": 4306, "originalPrice": "\\17,050", "discount": "(74% off)", "discountPercent": 74, "endDate": "Ends 30 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/48-Audio-Editor/6446-Melodyne-5-Essential?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/wn2sjcd6bl46rvmes38vpppt1l6o"}, {"name": "Soundbox Instruments Bundle", "salePrice": 13089, "originalPrice": "\\18,772", "discount": "(30% off)", "discountPercent": 30, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/58-Instrument-Bundles/13347-Soundbox-Instruments-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/gmwviv90sijow38uqxsi97qbuedc"}, {"name": "The God Particle", "salePrice": 14346, "originalPrice": "\\20,494", "discount": "(30% off)", "discountPercent": 30, "endDate": "Ends 31 Dec", "productUrl": "https://www.pluginboutique.com/product/2-Effects/50-Mastering-/16579-The-God-Particle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/solubf4ka79stjc8qm36unieae56"}, {"name": "Melodyne 5 Assistant Upgrade from Melodyne Essential", "salePrice": 8439, "originalPrice": "\\25,661", "discount": "(67% off)", "discountPercent": 67, "endDate": "Ends 30 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/48-Audio-Editor/6459-Melodyne-5-Assistant-Upgrade-from-Melodyne-Essential?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/fxztiamyvtrufhdireeu150u94ep"}, {"name": "Plugin Boutique $29 Holiday 2025 Bundle", "salePrice": 4994, "originalPrice": "\\65,098", "discount": "(92% off)", "discountPercent": 92, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/97-Various-Category/16170-Plugin-Boutique-29-Holiday-2025-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/mrr85mgwslae2whm6jmjpcs20b1v"}, {"name": "Scaler 3", "salePrice": 13605, "originalPrice": "\\17,050", "discount": "(20% off)", "discountPercent": 20, "endDate": "Ends 31 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/93-Music-Theory-Tools/14563-Scaler-3?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/nzlzl0j8myro15qmngvz93igrzu0"}, {"name": "Bloom Drum Machine", "salePrice": 6717, "originalPrice": "\\10,161", "discount": "(33% off)", "discountPercent": 33, "endDate": "Ends 11 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/64-Virtual-Instruments/13548-Bloom-Drum-Machine?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/eg4f66lhw56dxm32nzrxrb6ql2ws"}, {"name": "Opacity 2: Soundbox Instrument", "salePrice": 4994, "originalPrice": "\\7,406", "discount": "(32% off)", "discountPercent": 32, "endDate": "Ends 05 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/64-Virtual-Instruments/16560-Opacity-2-Soundbox-Instrument?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/tfssxodvfnh4il399z84h0r6cp0f"}, {"name": "VocalSynth 2", "salePrice": 4994, "originalPrice": "\\34,272", "discount": "(85% off)", "discountPercent": 85, "endDate": "Ends 07 Jan", "productUrl": "https://www.pluginboutique.com/product/2-Effects/54-Vocal-Processing/4413-VocalSynth-2?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/ugkewr6hxouxi8r2tsbvmellfbbw"}, {"name": "Excite Audio Bundle", "salePrice": 53216, "originalPrice": "\\109,877", "discount": "(51% off)", "discountPercent": 51, "endDate": "Ends 31 Dec", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/89-Complete-Collection/9866-Excite-Audio-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/m28koren2sfwdtrm5yx7317w5dse"}];
+    <header class="header">
+        <h1>🎹 DTMプラグインセール情報</h1>
+        <p>Plugin Boutiqueのお得なセール情報を毎日自動更新</p>
+    </header>
+    
+    <div class="container">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="total-count">0</div>
+                <div class="stat-label">セール中</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="urgent-count">0</div>
+                <div class="stat-label">まもなく終了</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="hot-count">0</div>
+                <div class="stat-label">70%OFF以上</div>
+            </div>
+        </div>
         
-        // 終了日でソート（早い順）- 年またぎ対応
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">すべて</button>
+            <button class="filter-btn" data-filter="50">50%OFF以上</button>
+            <button class="filter-btn" data-filter="70">70%OFF以上</button>
+            <button class="filter-btn" data-filter="90">90%OFF以上</button>
+        </div>
+        
+        <div class="grid" id="deals"></div>
+    </div>
+    
+    <footer class="footer">
+        <p>データ提供元: <a href="https://www.pluginboutique.com/" target="_blank">Plugin Boutique</a></p>
+        <p style="margin-top: 8px;">※価格は変動する場合があります。最新情報は公式サイトでご確認ください。</p>
+    </footer>
+    
+    <script>
+        const salesData = [{"name": "SSL Native Bus Compressor 2", "salePrice": 3272, "originalPrice": "\\25,661", "originalPriceNum": 25661, "savings": 22389, "discount": "(87% off)", "discountPercent": 87, "endDate": "Ends 05 Jan", "productUrl": "https://www.pluginboutique.com/product/2-Effects/8-Compressor/8651-SSL-Native-Bus-Compressor-2?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/ptcoewpmu647n80vpv8gvuxwl3v3"}, {"name": "Trackspacer", "salePrice": 4994, "originalPrice": "\\10,161", "originalPriceNum": 10161, "savings": 5167, "discount": "(50% off)", "discountPercent": 50, "endDate": "Ends 31 Dec", "productUrl": "https://www.pluginboutique.com/product/2-Effects/71-Dynamics-Processor/3259-Trackspacer?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/0hju24yntv1r401g5oalicu9gxgs"}, {"name": "Bloom Bass Groove Lite", "salePrice": 3272, "originalPrice": "\\4,994", "originalPriceNum": 4994, "savings": 1722, "discount": "(34% off)", "discountPercent": 34, "endDate": "Ends 11 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/64-Virtual-Instruments/14167-Bloom-Bass-Groove-Lite?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/u69pt6rcvl03p8hnlfc0918m3xvp"}, {"name": "Plugin Boutique Serum Presets Bundle", "salePrice": 4994, "originalPrice": "\\17,050", "originalPriceNum": 17050, "savings": 12056, "discount": "(70% off)", "discountPercent": 70, "endDate": "Ends 07 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/31-Synth-Presets/9747-Plugin-Boutique-Serum-Presets-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/zg1zjaudcw4j3mxzdajw6x7hucjr"}, {"name": "Melodyne 5 Assistant Limited Time Offer", "salePrice": 12744, "originalPrice": "\\42,711", "originalPriceNum": 42711, "savings": 29967, "discount": "(70% off)", "discountPercent": 70, "endDate": "Ends 30 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/48-Audio-Editor/7687-Melodyne-5-Assistant-Limited-Time-Offer?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/wvc5hdqib0lgnzhdz42n2r4irbh2"}, {"name": "Melodyne 5 Studio Limited Time Offer", "salePrice": 47189, "originalPrice": "\\120,211", "originalPriceNum": 120211, "savings": 73022, "discount": "(60% off)", "discountPercent": 60, "endDate": "Ends 30 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/48-Audio-Editor/7684-Melodyne-5-Studio-Limited-Time-Offer?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/e7e8id1gi5gx6yrpp1ibyejxe94c"}, {"name": "Plugin Boutique $69 Holiday 2025 Bundle", "salePrice": 11883, "originalPrice": "\\313,611", "originalPriceNum": 313611, "savings": 301728, "discount": "(96% off)", "discountPercent": 96, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/97-Various-Category/16137-Plugin-Boutique-69-Holiday-2025-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/p0nntwp3r0fkuouzl4igu5mdkbwj"}, {"name": "Thenatan Full Bundle", "salePrice": 6717, "originalPrice": "\\311,376", "originalPriceNum": 311376, "savings": 304659, "discount": "(97% off)", "discountPercent": 97, "endDate": "Ends 07 Jan", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/89-Complete-Collection/16253-Thenatan-Full-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/enluvkxl2aw3sgca1n1xguwpj7du"}, {"name": "ROYAL 2", "salePrice": 1550, "originalPrice": "\\20,494", "originalPriceNum": 20494, "savings": 18944, "discount": "(92% off)", "discountPercent": 92, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/64-Virtual-Instruments/6257-ROYAL-2?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/jdr947y19gsak0b3b3gu68te4u91"}, {"name": "Oxford Inflator", "salePrice": 6544, "originalPrice": "\\26,867", "originalPriceNum": 26867, "savings": 20323, "discount": "(75% off)", "discountPercent": 75, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/2-Effects/9-Limiter/492-Oxford-Inflator?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/stp07ligbgoqbbg86vpturpvodpn"}, {"name": "Melodyne 5 Essential", "salePrice": 4306, "originalPrice": "\\17,050", "originalPriceNum": 17050, "savings": 12744, "discount": "(74% off)", "discountPercent": 74, "endDate": "Ends 30 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/48-Audio-Editor/6446-Melodyne-5-Essential?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/wn2sjcd6bl46rvmes38vpppt1l6o"}, {"name": "Soundbox Instruments Bundle", "salePrice": 13089, "originalPrice": "\\18,772", "originalPriceNum": 18772, "savings": 5683, "discount": "(30% off)", "discountPercent": 30, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/58-Instrument-Bundles/13347-Soundbox-Instruments-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/gmwviv90sijow38uqxsi97qbuedc"}, {"name": "The God Particle", "salePrice": 14346, "originalPrice": "\\20,494", "originalPriceNum": 20494, "savings": 6148, "discount": "(30% off)", "discountPercent": 30, "endDate": "Ends 31 Dec", "productUrl": "https://www.pluginboutique.com/product/2-Effects/50-Mastering-/16579-The-God-Particle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/solubf4ka79stjc8qm36unieae56"}, {"name": "Melodyne 5 Assistant Upgrade from Melodyne Essential", "salePrice": 8439, "originalPrice": "\\25,661", "originalPriceNum": 25661, "savings": 17222, "discount": "(67% off)", "discountPercent": 67, "endDate": "Ends 30 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/48-Audio-Editor/6459-Melodyne-5-Assistant-Upgrade-from-Melodyne-Essential?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/fxztiamyvtrufhdireeu150u94ep"}, {"name": "Plugin Boutique $29 Holiday 2025 Bundle", "salePrice": 4994, "originalPrice": "\\65,098", "originalPriceNum": 65098, "savings": 60104, "discount": "(92% off)", "discountPercent": 92, "endDate": "Ends 04 Jan", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/97-Various-Category/16170-Plugin-Boutique-29-Holiday-2025-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/mrr85mgwslae2whm6jmjpcs20b1v"}, {"name": "Scaler 3", "salePrice": 13605, "originalPrice": "\\17,050", "originalPriceNum": 17050, "savings": 3445, "discount": "(20% off)", "discountPercent": 20, "endDate": "Ends 31 Dec", "productUrl": "https://www.pluginboutique.com/product/3-Studio-Tools/93-Music-Theory-Tools/14563-Scaler-3?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/nzlzl0j8myro15qmngvz93igrzu0"}, {"name": "Bloom Drum Machine", "salePrice": 6717, "originalPrice": "\\10,161", "originalPriceNum": 10161, "savings": 3444, "discount": "(33% off)", "discountPercent": 33, "endDate": "Ends 11 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/64-Virtual-Instruments/13548-Bloom-Drum-Machine?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/eg4f66lhw56dxm32nzrxrb6ql2ws"}, {"name": "Opacity 2: Soundbox Instrument", "salePrice": 4994, "originalPrice": "\\7,406", "originalPriceNum": 7406, "savings": 2412, "discount": "(32% off)", "discountPercent": 32, "endDate": "Ends 05 Jan", "productUrl": "https://www.pluginboutique.com/product/1-Instruments/64-Virtual-Instruments/16560-Opacity-2-Soundbox-Instrument?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/tfssxodvfnh4il399z84h0r6cp0f"}, {"name": "VocalSynth 2", "salePrice": 4994, "originalPrice": "\\34,272", "originalPriceNum": 34272, "savings": 29278, "discount": "(85% off)", "discountPercent": 85, "endDate": "Ends 07 Jan", "productUrl": "https://www.pluginboutique.com/product/2-Effects/54-Vocal-Processing/4413-VocalSynth-2?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/ugkewr6hxouxi8r2tsbvmellfbbw"}, {"name": "Excite Audio Bundle", "salePrice": 53216, "originalPrice": "\\109,877", "originalPriceNum": 109877, "savings": 56661, "discount": "(51% off)", "discountPercent": 51, "endDate": "Ends 31 Dec", "productUrl": "https://www.pluginboutique.com/product/81-Bundles/89-Complete-Collection/9866-Excite-Audio-Bundle?a_aid=688228cd487ff", "imageUrl": "https://banners.pluginboutique.com/m28koren2sfwdtrm5yx7317w5dse"}];
+        
         function parseEndDate(dateStr) {
             if (!dateStr) return new Date('2099-12-31');
             const match = dateStr.match(/Ends\s+(\d+)\s+(\w+)/);
@@ -52,20 +406,29 @@
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
             
-            // 現在が12月で、終了日が1-3月の場合は来年
             let year = currentYear;
             if (currentMonth >= 10 && month <= 2) {
                 year = currentYear + 1;
-            }
-            // 現在が1-2月で、終了日が12月の場合は今年（既に過ぎている可能性）
-            if (currentMonth <= 1 && month === 11) {
-                year = currentYear;
             }
             
             return new Date(year, month, day);
         }
         
+        function getDaysRemaining(dateStr) {
+            const endDate = parseEndDate(dateStr);
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const diffTime = endDate - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+        
         salesData.sort((a, b) => parseEndDate(a.endDate) - parseEndDate(b.endDate));
+        
+        // Stats
+        document.getElementById('total-count').textContent = salesData.length;
+        document.getElementById('urgent-count').textContent = salesData.filter(d => getDaysRemaining(d.endDate) <= 3).length;
+        document.getElementById('hot-count').textContent = salesData.filter(d => d.discountPercent >= 70).length;
         
         let currentFilter = 'all';
         
@@ -77,20 +440,80 @@
                 ? salesData 
                 : salesData.filter(deal => deal.discountPercent >= parseInt(currentFilter));
             
+            // Update filter counts
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                const filter = btn.dataset.filter;
+                let count;
+                if (filter === 'all') {
+                    count = salesData.length;
+                } else {
+                    count = salesData.filter(d => d.discountPercent >= parseInt(filter)).length;
+                }
+                const existingCount = btn.querySelector('.count');
+                if (existingCount) existingCount.remove();
+                const countSpan = document.createElement('span');
+                countSpan.className = 'count';
+                countSpan.textContent = count;
+                btn.appendChild(countSpan);
+            });
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-results">該当するセールがありません</div>';
+                return;
+            }
+            
             filtered.forEach(deal => {
+                const daysRemaining = getDaysRemaining(deal.endDate);
+                const isUrgent = daysRemaining <= 3;
+                const isWarning = daysRemaining <= 7 && daysRemaining > 3;
+                const isHot = deal.discountPercent >= 70;
+                const isSuper = deal.discountPercent >= 90;
+                
                 const card = document.createElement('div');
                 card.className = 'card';
+                
+                let badges = '';
+                if (isUrgent) badges += '<span class="badge badge-urgent">残り' + daysRemaining + '日</span>';
+                if (isSuper) badges += '<span class="badge badge-super">激安</span>';
+                else if (isHot) badges += '<span class="badge badge-hot">注目</span>';
+                
+                let endDateClass = 'end-date-text';
+                let endDateText = deal.endDate;
+                if (isUrgent) {
+                    endDateClass = 'end-date-urgent';
+                    endDateText = '⚠️ 残り' + daysRemaining + '日で終了!';
+                } else if (isWarning) {
+                    endDateClass = 'end-date-warning';
+                    endDateText = '残り' + daysRemaining + '日 (' + deal.endDate + ')';
+                }
+                
+                const ctaBtnClass = (isUrgent || isSuper) ? 'cta-btn cta-btn-hot' : 'cta-btn';
+                const ctaText = isUrgent ? '🔥 今すぐチェック →' : 'セール価格で見る →';
+                
                 card.innerHTML = `
-                    <img src="${deal.imageUrl}" alt="${deal.name}" onerror="this.style.display='none'">
+                    <div class="card-badges">${badges}</div>
+                    ${deal.imageUrl ? 
+                        `<img src="${deal.imageUrl}" alt="${deal.name}" class="card-image" onerror="this.outerHTML='<div class=\'card-image-placeholder\'>🎹 ${deal.name.substring(0,20)}</div>'">` : 
+                        `<div class="card-image-placeholder">🎹 ${deal.name.substring(0,20)}</div>`
+                    }
                     <div class="card-body">
                         <div class="card-title">${deal.name}</div>
-                        <div>
-                            <span class="price">¥${deal.salePrice.toLocaleString()}</span>
-                            <span class="original">${deal.originalPrice}</span>
-                            <span class="discount">${deal.discount}</span>
+                        <div class="price-section">
+                            <span class="price-current">¥${deal.salePrice.toLocaleString()}</span>
+                            <span class="price-original">${deal.originalPrice}</span>
+                            <span class="discount-tag">${deal.discountPercent}%OFF</span>
                         </div>
-                        <div class="end-date">${deal.endDate}</div>
-                        <a href="${deal.productUrl}" target="_blank" class="btn">詳細を見る</a>
+                        ${deal.savings > 0 ? `
+                        <div class="savings">
+                            <span class="savings-icon">💰</span>
+                            <span class="savings-text">¥${deal.savings.toLocaleString()} お得!</span>
+                        </div>
+                        ` : ''}
+                        <div class="end-date">
+                            <span class="end-date-icon">📅</span>
+                            <span class="${endDateClass}">${endDateText}</span>
+                        </div>
+                        <a href="${deal.productUrl}" target="_blank" rel="noopener" class="${ctaBtnClass}">${ctaText}</a>
                     </div>
                 `;
                 container.appendChild(card);
