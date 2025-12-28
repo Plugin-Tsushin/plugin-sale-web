@@ -30,7 +30,6 @@ with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
         
         sale_price = int(''.join(filter(str.isdigit, str(sale_price_str)))) if sale_price_str else 0
         
-        # 割引率を数値で抽出
         discount_match = re.search(r'(\d+)%', str(discount))
         discount_percent = int(discount_match.group(1)) if discount_match else 0
         
@@ -87,7 +86,7 @@ html = '''<!DOCTYPE html>
     <script>
         const salesData = ''' + sales_json + ''';
         
-        // 終了日でソート（早い順）
+        // 終了日でソート（早い順）- 年またぎ対応
         function parseEndDate(dateStr) {
             if (!dateStr) return new Date('2099-12-31');
             const match = dateStr.match(/Ends\\s+(\\d+)\\s+(\\w+)/);
@@ -96,7 +95,21 @@ html = '''<!DOCTYPE html>
             const monthStr = match[2];
             const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
             const month = months[monthStr] !== undefined ? months[monthStr] : 0;
-            const year = new Date().getFullYear();
+            
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            // 現在が12月で、終了日が1-3月の場合は来年
+            let year = currentYear;
+            if (currentMonth >= 10 && month <= 2) {
+                year = currentYear + 1;
+            }
+            // 現在が1-2月で、終了日が12月の場合は今年（既に過ぎている可能性）
+            if (currentMonth <= 1 && month === 11) {
+                year = currentYear;
+            }
+            
             return new Date(year, month, day);
         }
         
