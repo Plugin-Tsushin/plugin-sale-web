@@ -1,22 +1,46 @@
 import csv
 import json
 
-# CSVを読み込み
+# CSVを読み込み（複数のエンコーディングを試す）
 sales_data = []
-with open('plugin_data.csv', 'r', encoding='utf-8', errors='replace') as f:
+encodings = ['utf-8', 'cp932', 'shift_jis', 'utf-8-sig']
+
+for encoding in encodings:
+    try:
+        with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
+            content = f.read()
+            # ヘッダー行を確認
+            if 'プラグイン名' in content or 'セール価格' in content:
+                break
+    except:
+        continue
+
+with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
     reader = csv.DictReader(f)
     for row in reader:
-        sale_price_str = row.get('セール価格', '0')
-        sale_price = int(''.join(filter(str.isdigit, sale_price_str))) if sale_price_str else 0
+        # キー名を取得（文字化け対策）
+        keys = list(row.keys())
+        
+        # 各カラムの値を取得
+        name = row.get('プラグイン名', row.get(keys[0], '')) if keys else ''
+        sale_price_str = row.get('セール価格', row.get(keys[1], '0')) if len(keys) > 1 else '0'
+        original_price = row.get('定価', row.get(keys[2], '')) if len(keys) > 2 else ''
+        discount = row.get('セール率', row.get(keys[3], '')) if len(keys) > 3 else ''
+        end_date = row.get('終了日', row.get(keys[4], '')) if len(keys) > 4 else ''
+        product_url = row.get('商品URL', row.get(keys[5], '')) if len(keys) > 5 else ''
+        image_url = row.get('画像URL', row.get(keys[6], '')) if len(keys) > 6 else ''
+        
+        # 価格から数字を抽出
+        sale_price = int(''.join(filter(str.isdigit, str(sale_price_str)))) if sale_price_str else 0
         
         sales_data.append({
-            'name': row.get('プラグイン名', ''),
+            'name': name,
             'salePrice': sale_price,
-            'originalPrice': row.get('定価', ''),
-            'discount': row.get('セール率', ''),
-            'endDate': row.get('終了日', ''),
-            'productUrl': row.get('商品URL', ''),
-            'imageUrl': row.get('画像URL', '')
+            'originalPrice': original_price,
+            'discount': discount,
+            'endDate': end_date,
+            'productUrl': product_url,
+            'imageUrl': image_url
         })
 
 sales_json = json.dumps(sales_data, ensure_ascii=False)
