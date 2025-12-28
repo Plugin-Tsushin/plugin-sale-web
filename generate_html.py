@@ -1,6 +1,12 @@
 import csv
 import json
 import re
+from datetime import datetime, timezone, timedelta
+
+# 日本時間を取得
+JST = timezone(timedelta(hours=9))
+now_jst = datetime.now(JST)
+update_time = now_jst.strftime('%Y/%m/%d %H:%M')
 
 # CSVを読み込み
 sales_data = []
@@ -153,6 +159,21 @@ html = '''<!DOCTYPE html>
         .header p {
             color: #666;
             font-size: 13px;
+        }
+        
+        .update-time {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 14px;
+            background: #1a1a24;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .update-time span {
+            color: #22c55e;
+            font-weight: 500;
         }
         
         .container {
@@ -459,6 +480,7 @@ html = '''<!DOCTYPE html>
     <header class="header">
         <h1>🎹 DTMプラグインセール情報</h1>
         <p>Plugin Boutique のセール情報を毎日自動更新</p>
+        <div class="update-time">🕐 最終更新: <span>''' + update_time + '''</span></div>
     </header>
     
     <div class="container">
