@@ -1,9 +1,8 @@
 import csv
 import json
 import re
-from datetime import datetime, timedelta
 
-# CSVを読み込み（複数のエンコーディングを試す）
+# CSVを読み込み
 sales_data = []
 encodings = ['utf-8', 'cp932', 'shift_jis', 'utf-8-sig']
 
@@ -39,10 +38,8 @@ with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
         sales_data.append({
             'name': name,
             'salePrice': sale_price,
-            'originalPrice': original_price_str,
-            'originalPriceNum': original_price,
+            'originalPrice': original_price,
             'savings': savings,
-            'discount': discount,
             'discountPercent': discount_percent,
             'endDate': end_date,
             'productUrl': product_url,
@@ -56,62 +53,38 @@ html = '''<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DTMプラグインセール情報 | 毎日自動更新</title>
-    <meta name="description" content="Plugin Boutiqueのお得なDTMプラグインセール情報を毎日自動更新。終了間近のセールを見逃さない！">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>DTMプラグインセール情報 | 毎日更新</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-primary: #0f0f13;
-            --bg-secondary: #1a1a23;
-            --bg-card: #1e1e2a;
-            --bg-card-hover: #252533;
-            --accent: #6366f1;
-            --accent-hover: #818cf8;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0b0;
-            --text-muted: #6b6b7b;
-            --border: #2a2a3a;
-        }
-        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #0d0d12;
+            color: #fff;
+            min-height: 100vh;
         }
         
         .header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 40px 20px;
             text-align: center;
-            border-bottom: 1px solid var(--border);
+            padding: 32px 20px 24px;
         }
         
         .header h1 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
         }
         
         .header p {
-            color: var(--text-secondary);
-            font-size: 14px;
+            color: #888;
+            font-size: 13px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 16px 40px;
         }
         
         .filters {
@@ -120,314 +93,188 @@ html = '''<!DOCTYPE html>
             gap: 8px;
             margin-bottom: 24px;
             flex-wrap: wrap;
-            padding: 16px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
         }
         
         .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid var(--border);
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s;
+            padding: 8px 16px;
+            border: 1px solid #333;
+            border-radius: 20px;
             background: transparent;
-            color: var(--text-secondary);
+            color: #888;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         
         .filter-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
+            border-color: #666;
+            color: #fff;
         }
         
         .filter-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-        }
-        
-        .filter-btn .count {
-            background: rgba(255,255,255,0.2);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            margin-left: 6px;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-muted);
+            background: #5b5bf0;
+            border-color: #5b5bf0;
+            color: #fff;
         }
         
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
         }
         
         .card {
-            background: var(--bg-card);
-            border-radius: 16px;
+            background: #16161d;
+            border-radius: 12px;
             overflow: hidden;
-            transition: all 0.3s;
-            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
         }
         
         .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
         
-        .card-badges {
+        .card-urgent {
+            border: 1px solid #ef4444;
+        }
+        
+        .urgent-label {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            display: flex;
-            gap: 6px;
-            z-index: 10;
-            flex-wrap: wrap;
-        }
-        
-        .badge {
-            padding: 4px 10px;
-            border-radius: 6px;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 11px;
             font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        .badge-urgent {
-            background: var(--danger);
-            color: white;
-            animation: pulse 2s infinite;
-        }
-        
-        .badge-hot {
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            color: white;
-        }
-        
-        .badge-super {
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            color: white;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
         }
         
         .card-image {
             width: 100%;
-            height: 140px;
+            height: 120px;
             object-fit: cover;
-            background: var(--bg-secondary);
-        }
-        
-        .card-image-placeholder {
-            width: 100%;
-            height: 140px;
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            font-size: 12px;
+            background: #1a1a24;
         }
         
         .card-body {
-            padding: 16px;
+            padding: 14px;
         }
         
         .card-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 10px;
             line-height: 1.4;
+            color: #eee;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            min-height: 36px;
         }
         
-        .price-section {
-            margin-bottom: 12px;
+        .price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 6px;
         }
         
-        .price-current {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--success);
+        .price-sale {
+            font-size: 22px;
+            font-weight: 700;
+            color: #22c55e;
         }
         
         .price-original {
-            font-size: 14px;
-            color: var(--text-muted);
+            font-size: 13px;
+            color: #666;
             text-decoration: line-through;
-            margin-left: 8px;
         }
         
-        .discount-tag {
-            display: inline-block;
-            background: var(--danger);
-            color: white;
-            padding: 3px 8px;
+        .discount-badge {
+            background: #dc2626;
+            color: #fff;
+            padding: 2px 6px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            margin-left: 8px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-top: 1px solid #222;
+            font-size: 12px;
         }
         
         .savings {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .savings-icon {
-            font-size: 16px;
-        }
-        
-        .savings-text {
-            font-size: 13px;
-            color: var(--success);
-            font-weight: 600;
+            color: #22c55e;
         }
         
         .end-date {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 14px;
-            padding: 8px 12px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        
-        .end-date-icon {
-            font-size: 14px;
-        }
-        
-        .end-date-text {
-            color: var(--text-secondary);
+            color: #888;
         }
         
         .end-date-urgent {
-            color: var(--danger);
-            font-weight: 600;
-        }
-        
-        .end-date-warning {
-            color: var(--warning);
-            font-weight: 600;
+            color: #ef4444;
+            font-weight: 500;
         }
         
         .cta-btn {
             display: block;
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
-            color: white;
-            text-decoration: none;
+            padding: 12px;
+            background: #5b5bf0;
+            color: #fff;
             text-align: center;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 14px;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s;
         }
         
         .cta-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            background: #4a4ae0;
         }
         
-        .cta-btn-hot {
-            background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%);
+        .cta-btn-urgent {
+            background: linear-gradient(90deg, #ef4444, #f97316);
         }
         
-        .cta-btn-hot:hover {
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        .cta-btn-urgent:hover {
+            background: linear-gradient(90deg, #dc2626, #ea580c);
         }
         
         .footer {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            font-size: 12px;
+            padding: 24px;
+            color: #555;
+            font-size: 11px;
         }
         
-        .footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-        }
+        .footer a { color: #5b5bf0; text-decoration: none; }
         
         @media (max-width: 640px) {
-            .header h1 { font-size: 22px; }
             .grid { grid-template-columns: 1fr; }
-            .filters { gap: 6px; }
-            .filter-btn { padding: 8px 14px; font-size: 12px; }
+            .header h1 { font-size: 20px; }
         }
     </style>
 </head>
 <body>
     <header class="header">
         <h1>🎹 DTMプラグインセール情報</h1>
-        <p>Plugin Boutiqueのお得なセール情報を毎日自動更新</p>
+        <p>Plugin Boutique セール情報を毎日自動更新</p>
     </header>
     
     <div class="container">
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-value" id="total-count">0</div>
-                <div class="stat-label">セール中</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="urgent-count">0</div>
-                <div class="stat-label">まもなく終了</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="hot-count">0</div>
-                <div class="stat-label">70%OFF以上</div>
-            </div>
-        </div>
-        
         <div class="filters">
             <button class="filter-btn active" data-filter="all">すべて</button>
             <button class="filter-btn" data-filter="50">50%OFF以上</button>
@@ -439,8 +286,7 @@ html = '''<!DOCTYPE html>
     </div>
     
     <footer class="footer">
-        <p>データ提供元: <a href="https://www.pluginboutique.com/" target="_blank">Plugin Boutique</a></p>
-        <p style="margin-top: 8px;">※価格は変動する場合があります。最新情報は公式サイトでご確認ください。</p>
+        <p>データ: <a href="https://www.pluginboutique.com/" target="_blank">Plugin Boutique</a> | 価格は変動する場合があります</p>
     </footer>
     
     <script>
@@ -456,32 +302,20 @@ html = '''<!DOCTYPE html>
             const month = months[monthStr] !== undefined ? months[monthStr] : 0;
             
             const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
-            
-            let year = currentYear;
-            if (currentMonth >= 10 && month <= 2) {
-                year = currentYear + 1;
-            }
+            let year = now.getFullYear();
+            if (now.getMonth() >= 10 && month <= 2) year++;
             
             return new Date(year, month, day);
         }
         
         function getDaysRemaining(dateStr) {
-            const endDate = parseEndDate(dateStr);
+            const end = parseEndDate(dateStr);
             const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            const diffTime = endDate - now;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
+            now.setHours(0,0,0,0);
+            return Math.ceil((end - now) / (1000 * 60 * 60 * 24));
         }
         
         salesData.sort((a, b) => parseEndDate(a.endDate) - parseEndDate(b.endDate));
-        
-        // Stats
-        document.getElementById('total-count').textContent = salesData.length;
-        document.getElementById('urgent-count').textContent = salesData.filter(d => getDaysRemaining(d.endDate) <= 3).length;
-        document.getElementById('hot-count').textContent = salesData.filter(d => d.discountPercent >= 70).length;
         
         let currentFilter = 'all';
         
@@ -491,82 +325,34 @@ html = '''<!DOCTYPE html>
             
             const filtered = currentFilter === 'all' 
                 ? salesData 
-                : salesData.filter(deal => deal.discountPercent >= parseInt(currentFilter));
-            
-            // Update filter counts
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                const filter = btn.dataset.filter;
-                let count;
-                if (filter === 'all') {
-                    count = salesData.length;
-                } else {
-                    count = salesData.filter(d => d.discountPercent >= parseInt(filter)).length;
-                }
-                const existingCount = btn.querySelector('.count');
-                if (existingCount) existingCount.remove();
-                const countSpan = document.createElement('span');
-                countSpan.className = 'count';
-                countSpan.textContent = count;
-                btn.appendChild(countSpan);
-            });
-            
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="no-results">該当するセールがありません</div>';
-                return;
-            }
+                : salesData.filter(d => d.discountPercent >= parseInt(currentFilter));
             
             filtered.forEach(deal => {
-                const daysRemaining = getDaysRemaining(deal.endDate);
-                const isUrgent = daysRemaining <= 3;
-                const isWarning = daysRemaining <= 7 && daysRemaining > 3;
-                const isHot = deal.discountPercent >= 70;
-                const isSuper = deal.discountPercent >= 90;
+                const days = getDaysRemaining(deal.endDate);
+                const isUrgent = days <= 3;
                 
                 const card = document.createElement('div');
-                card.className = 'card';
+                card.className = 'card' + (isUrgent ? ' card-urgent' : '');
                 
-                let badges = '';
-                if (isUrgent) badges += '<span class="badge badge-urgent">残り' + daysRemaining + '日</span>';
-                if (isSuper) badges += '<span class="badge badge-super">激安</span>';
-                else if (isHot) badges += '<span class="badge badge-hot">注目</span>';
-                
-                let endDateClass = 'end-date-text';
-                let endDateText = deal.endDate;
-                if (isUrgent) {
-                    endDateClass = 'end-date-urgent';
-                    endDateText = '⚠️ 残り' + daysRemaining + '日で終了!';
-                } else if (isWarning) {
-                    endDateClass = 'end-date-warning';
-                    endDateText = '残り' + daysRemaining + '日 (' + deal.endDate + ')';
-                }
-                
-                const ctaBtnClass = (isUrgent || isSuper) ? 'cta-btn cta-btn-hot' : 'cta-btn';
-                const ctaText = isUrgent ? '🔥 今すぐチェック →' : 'セール価格で見る →';
+                const endText = isUrgent ? `残り${days}日` : deal.endDate.replace('Ends ', '');
                 
                 card.innerHTML = `
-                    <div class="card-badges">${badges}</div>
-                    ${deal.imageUrl ? 
-                        `<img src="${deal.imageUrl}" alt="${deal.name}" class="card-image" onerror="this.outerHTML='<div class=\\'card-image-placeholder\\'>🎹 ${deal.name.substring(0,20)}</div>'">` : 
-                        `<div class="card-image-placeholder">🎹 ${deal.name.substring(0,20)}</div>`
-                    }
+                    ${isUrgent ? '<div class="urgent-label">まもなく終了</div>' : ''}
+                    <img src="${deal.imageUrl}" alt="" class="card-image" onerror="this.style.display='none'">
                     <div class="card-body">
                         <div class="card-title">${deal.name}</div>
-                        <div class="price-section">
-                            <span class="price-current">¥${deal.salePrice.toLocaleString()}</span>
-                            <span class="price-original">${deal.originalPrice}</span>
-                            <span class="discount-tag">${deal.discountPercent}%OFF</span>
+                        <div class="price-row">
+                            <span class="price-sale">¥${deal.salePrice.toLocaleString()}</span>
+                            <span class="price-original">¥${deal.originalPrice.toLocaleString()}</span>
+                            <span class="discount-badge">${deal.discountPercent}%OFF</span>
                         </div>
-                        ${deal.savings > 0 ? `
-                        <div class="savings">
-                            <span class="savings-icon">💰</span>
-                            <span class="savings-text">¥${deal.savings.toLocaleString()} お得!</span>
+                        <div class="info-row">
+                            <span class="savings">¥${deal.savings.toLocaleString()} お得</span>
+                            <span class="${isUrgent ? 'end-date-urgent' : 'end-date'}">${endText}</span>
                         </div>
-                        ` : ''}
-                        <div class="end-date">
-                            <span class="end-date-icon">📅</span>
-                            <span class="${endDateClass}">${endDateText}</span>
-                        </div>
-                        <a href="${deal.productUrl}" target="_blank" rel="noopener" class="${ctaBtnClass}">${ctaText}</a>
+                        <a href="${deal.productUrl}" target="_blank" class="cta-btn${isUrgent ? ' cta-btn-urgent' : ''}">
+                            ${isUrgent ? '🔥 今すぐチェック' : '詳細を見る'}
+                        </a>
                     </div>
                 `;
                 container.appendChild(card);
