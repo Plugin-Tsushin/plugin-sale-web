@@ -7,6 +7,7 @@ from datetime import datetime, timezone, timedelta
 JST = timezone(timedelta(hours=9))
 now_jst = datetime.now(JST)
 update_time = now_jst.strftime('%Y/%m/%d %H:%M')
+update_date_iso = now_jst.strftime('%Y-%m-%dT%H:%M:%S+09:00')
 
 # CSVを読み込み
 sales_data = []
@@ -126,13 +127,52 @@ with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
 
 sales_json = json.dumps(sales_data, ensure_ascii=False)
 
+# 構造化データ（JSON-LD）
+structured_data = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DTMプラグインセール情報",
+    "description": "Plugin Boutiqueの最新DTMプラグインセール情報を毎日自動更新。人気のMelodyne、iZotope、SSL、Waves等のプラグインをお得にゲット！",
+    "url": "https://plugin-tsushin.github.io/plugin-sale/",
+    "inLanguage": "ja",
+    "dateModified": update_date_iso,
+    "publisher": {
+        "@type": "Organization",
+        "name": "Plugin通信"
+    }
+}
+structured_data_json = json.dumps(structured_data, ensure_ascii=False)
+
 html = '''<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DTMプラグインセール情報 | 毎日更新</title>
-    <meta name="description" content="Plugin Boutiqueの最新セール情報を毎日自動更新。人気プラグインをお得にゲット！">
+    
+    <!-- SEO基本設定 -->
+    <title>DTMプラグインセール情報まとめ | Plugin Boutique最新セール【毎日更新】</title>
+    <meta name="description" content="Plugin Boutiqueの最新DTMプラグインセール情報を毎日自動更新。Melodyne、iZotope、SSL、Waves等の人気プラグインを最大90%OFFでお得に購入。終了間近のセールを見逃さない！">
+    <meta name="keywords" content="DTM,プラグイン,セール,Plugin Boutique,VST,Melodyne,iZotope,SSL,Waves,DAW,音楽制作">
+    <meta name="author" content="Plugin通信">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://plugin-tsushin.github.io/plugin-sale/">
+    
+    <!-- OGP（SNSシェア用） -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DTMプラグインセール情報まとめ | 毎日更新">
+    <meta property="og:description" content="Plugin Boutiqueの最新DTMプラグインセール情報を毎日自動更新。人気プラグインを最大90%OFFでお得にゲット！">
+    <meta property="og:url" content="https://plugin-tsushin.github.io/plugin-sale/">
+    <meta property="og:site_name" content="DTMプラグインセール情報">
+    <meta property="og:locale" content="ja_JP">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="DTMプラグインセール情報まとめ | 毎日更新">
+    <meta name="twitter:description" content="Plugin Boutiqueの最新DTMプラグインセール情報を毎日自動更新。人気プラグインを最大90%OFFで！">
+    
+    <!-- 構造化データ -->
+    <script type="application/ld+json">''' + structured_data_json + '''</script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -215,6 +255,13 @@ html = '''<!DOCTYPE html>
         }
         
         /* セール一覧 */
+        .deals-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+        
         .deals-list {
             display: flex;
             flex-direction: column;
@@ -356,7 +403,7 @@ html = '''<!DOCTYPE html>
             border-top: 1px solid #1e1e2a;
         }
         
-        .faq-title {
+        .faq-section h2 {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 20px;
@@ -375,14 +422,14 @@ html = '''<!DOCTYPE html>
             padding: 16px 20px;
         }
         
-        .faq-q {
+        .faq-item h3 {
             font-size: 14px;
             font-weight: 700;
             color: #5b5bf0;
             margin-bottom: 8px;
         }
         
-        .faq-a {
+        .faq-item p {
             font-size: 13px;
             color: #aaa;
             line-height: 1.7;
@@ -471,8 +518,8 @@ html = '''<!DOCTYPE html>
             
             .faq-section { margin-top: 40px; padding-top: 28px; }
             .faq-item { padding: 18px 16px; }
-            .faq-q { font-size: 14px; margin-bottom: 10px; }
-            .faq-a { font-size: 13px; line-height: 1.8; }
+            .faq-item h3 { font-size: 14px; margin-bottom: 10px; }
+            .faq-item p { font-size: 13px; line-height: 1.8; }
         }
     </style>
 </head>
@@ -483,44 +530,47 @@ html = '''<!DOCTYPE html>
         <div class="update-time">🕐 最終更新: <span>''' + update_time + '''</span></div>
     </header>
     
-    <div class="container">
+    <main class="container">
         <!-- フィルター -->
-        <div class="filters">
+        <nav class="filters" aria-label="割引率フィルター">
             <button class="filter-btn active" data-filter="all">すべて</button>
             <button class="filter-btn" data-filter="50">50%OFF以上</button>
             <button class="filter-btn" data-filter="70">70%OFF以上</button>
             <button class="filter-btn" data-filter="90">90%OFF以上</button>
-        </div>
+        </nav>
         
         <!-- セール一覧 -->
-        <div class="deals-list" id="deals"></div>
+        <section class="deals-section">
+            <h2>🔥 現在開催中のセール</h2>
+            <div class="deals-list" id="deals"></div>
+        </section>
         
         <!-- FAQ -->
-        <div class="faq-section">
-            <div class="faq-title">❓ よくある質問</div>
+        <section class="faq-section">
+            <h2>❓ よくある質問</h2>
             <div class="faq-list">
-                <div class="faq-item">
-                    <div class="faq-q">Q. 海外サイトでの購入は安全ですか？</div>
-                    <div class="faq-a">A. Plugin Boutiqueは世界最大級のプラグイン販売サイトで、100万人以上が利用しています。SSL暗号化通信、PayPal対応で安心して購入できます。</div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-q">Q. 届くまでどれくらいかかりますか？</div>
-                    <div class="faq-a">A. デジタル製品のため、購入完了後すぐにメールでライセンスキーが届きます。通常は数分以内です。</div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-q">Q. 日本語で使えますか？</div>
-                    <div class="faq-a">A. プラグイン自体は英語UIのものが多いですが、操作はシンプルです。YouTubeで「プラグイン名 + 使い方」で検索すると日本語解説動画が見つかります。</div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-q">Q. セール価格はいつまでですか？</div>
-                    <div class="faq-a">A. 各製品に「残り○日」と表示しています。終了日を過ぎると通常価格に戻るため、お早めの購入をおすすめします。</div>
-                </div>
+                <article class="faq-item">
+                    <h3>Q. 海外サイトでの購入は安全ですか？</h3>
+                    <p>A. Plugin Boutiqueは世界最大級のプラグイン販売サイトで、100万人以上が利用しています。SSL暗号化通信、PayPal対応で安心して購入できます。</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Q. 届くまでどれくらいかかりますか？</h3>
+                    <p>A. デジタル製品のため、購入完了後すぐにメールでライセンスキーが届きます。通常は数分以内です。</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Q. 日本語で使えますか？</h3>
+                    <p>A. プラグイン自体は英語UIのものが多いですが、操作はシンプルです。YouTubeで「プラグイン名 + 使い方」で検索すると日本語解説動画が見つかります。</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Q. セール価格はいつまでですか？</h3>
+                    <p>A. 各製品に「残り○日」と表示しています。終了日を過ぎると通常価格に戻るため、お早めの購入をおすすめします。</p>
+                </article>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
     
     <footer class="footer">
-        <p>データ: <a href="https://www.pluginboutique.com/" target="_blank">Plugin Boutique</a> | 価格は変動する場合があります</p>
+        <p>データ: <a href="https://www.pluginboutique.com/" target="_blank" rel="noopener">Plugin Boutique</a> | 価格は変動する場合があります</p>
     </footer>
     
     <script>
@@ -569,7 +619,7 @@ html = '''<!DOCTYPE html>
             filtered.forEach(deal => {
                 const days = getDaysRemaining(deal.endDate);
                 
-                const card = document.createElement('div');
+                const card = document.createElement('article');
                 card.className = 'deal-card';
                 
                 let tags = '<span class="tag tag-category">' + deal.categoryIcon + ' ' + deal.categoryLabel + '</span>';
@@ -581,8 +631,8 @@ html = '''<!DOCTYPE html>
                 card.innerHTML = 
                     '<div class="deal-info">' +
                         '<div class="deal-tags">' + tags + '</div>' +
-                        '<div class="deal-name">' + deal.name + '</div>' +
-                        '<div class="deal-target">' + deal.target + '</div>' +
+                        '<h3 class="deal-name">' + deal.name + '</h3>' +
+                        '<p class="deal-target">' + deal.target + '</p>' +
                         '<div class="deal-meta">' +
                             '<div class="deal-prices">' +
                                 '<span class="price-sale">¥' + deal.salePrice.toLocaleString() + '</span>' +
@@ -593,7 +643,7 @@ html = '''<!DOCTYPE html>
                         '</div>' +
                     '</div>' +
                     '<div class="deal-action">' +
-                        '<a href="' + deal.productUrl + '" target="_blank" class="cta-btn">セール価格で購入</a>' +
+                        '<a href="' + deal.productUrl + '" target="_blank" rel="noopener" class="cta-btn">セール価格で購入</a>' +
                     '</div>';
                 
                 container.appendChild(card);
