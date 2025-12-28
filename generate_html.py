@@ -1,5 +1,6 @@
 import csv
 import json
+import re
 
 # CSVを読み込み（複数のエンコーディングを試す）
 sales_data = []
@@ -9,7 +10,6 @@ for encoding in encodings:
     try:
         with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
             content = f.read()
-            # ヘッダー行を確認
             if 'プラグイン名' in content or 'セール価格' in content:
                 break
     except:
@@ -18,10 +18,8 @@ for encoding in encodings:
 with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
     reader = csv.DictReader(f)
     for row in reader:
-        # キー名を取得（文字化け対策）
         keys = list(row.keys())
         
-        # 各カラムの値を取得
         name = row.get('プラグイン名', row.get(keys[0], '')) if keys else ''
         sale_price_str = row.get('セール価格', row.get(keys[1], '0')) if len(keys) > 1 else '0'
         original_price = row.get('定価', row.get(keys[2], '')) if len(keys) > 2 else ''
@@ -30,14 +28,18 @@ with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
         product_url = row.get('商品URL', row.get(keys[5], '')) if len(keys) > 5 else ''
         image_url = row.get('画像URL', row.get(keys[6], '')) if len(keys) > 6 else ''
         
-        # 価格から数字を抽出
         sale_price = int(''.join(filter(str.isdigit, str(sale_price_str)))) if sale_price_str else 0
+        
+        # 割引率を数値で抽出
+        discount_match = re.search(r'(\d+)%', str(discount))
+        discount_percent = int(discount_match.group(1)) if discount_match else 0
         
         sales_data.append({
             'name': name,
             'salePrice': sale_price,
             'originalPrice': original_price,
             'discount': discount,
+            'discountPercent': discount_percent,
             'endDate': end_date,
             'productUrl': product_url,
             'imageUrl': image_url
@@ -55,6 +57,10 @@ html = '''<!DOCTYPE html>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0f; color: #e0e0e0; padding: 20px; }
         h1 { text-align: center; margin-bottom: 20px; color: #fff; }
+        .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; transition: all 0.2s; background: #2a2a3a; color: #e0e0e0; }
+        .filter-btn:hover { background: #3a3a4a; }
+        .filter-btn.active { background: #6366f1; color: #fff; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
         .card { background: #1a1a24; border-radius: 12px; overflow: hidden; transition: transform 0.2s; }
         .card:hover { transform: translateY(-4px); }
@@ -71,28 +77,71 @@ html = '''<!DOCTYPE html>
 </head>
 <body>
     <h1>おすすめセールプラグイン 毎日更新</h1>
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">すべて</button>
+        <button class="filter-btn" data-filter="50">50%OFF以上</button>
+        <button class="filter-btn" data-filter="70">70%OFF以上</button>
+        <button class="filter-btn" data-filter="90">90%OFF以上</button>
+    </div>
     <div class="grid" id="deals"></div>
     <script>
         const salesData = ''' + sales_json + ''';
-        const container = document.getElementById('deals');
-        salesData.forEach(deal => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <img src="${deal.imageUrl}" alt="${deal.name}" onerror="this.style.display='none'">
-                <div class="card-body">
-                    <div class="card-title">${deal.name}</div>
-                    <div>
-                        <span class="price">¥${deal.salePrice.toLocaleString()}</span>
-                        <span class="original">${deal.originalPrice}</span>
-                        <span class="discount">${deal.discount}</span>
+        
+        // 終了日でソート（早い順）
+        function parseEndDate(dateStr) {
+            if (!dateStr) return new Date('2099-12-31');
+            const match = dateStr.match(/Ends\\s+(\\d+)\\s+(\\w+)/);
+            if (!match) return new Date('2099-12-31');
+            const day = parseInt(match[1]);
+            const monthStr = match[2];
+            const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+            const month = months[monthStr] !== undefined ? months[monthStr] : 0;
+            const year = new Date().getFullYear();
+            return new Date(year, month, day);
+        }
+        
+        salesData.sort((a, b) => parseEndDate(a.endDate) - parseEndDate(b.endDate));
+        
+        let currentFilter = 'all';
+        
+        function renderDeals() {
+            const container = document.getElementById('deals');
+            container.innerHTML = '';
+            
+            const filtered = currentFilter === 'all' 
+                ? salesData 
+                : salesData.filter(deal => deal.discountPercent >= parseInt(currentFilter));
+            
+            filtered.forEach(deal => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${deal.imageUrl}" alt="${deal.name}" onerror="this.style.display='none'">
+                    <div class="card-body">
+                        <div class="card-title">${deal.name}</div>
+                        <div>
+                            <span class="price">¥${deal.salePrice.toLocaleString()}</span>
+                            <span class="original">${deal.originalPrice}</span>
+                            <span class="discount">${deal.discount}</span>
+                        </div>
+                        <div class="end-date">${deal.endDate}</div>
+                        <a href="${deal.productUrl}" target="_blank" class="btn">詳細を見る</a>
                     </div>
-                    <div class="end-date">${deal.endDate}</div>
-                    <a href="${deal.productUrl}" target="_blank" class="btn">詳細を見る</a>
-                </div>
-            `;
-            container.appendChild(card);
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderDeals();
+            });
         });
+        
+        renderDeals();
     </script>
 </body>
 </html>'''
