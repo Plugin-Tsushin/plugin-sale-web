@@ -1,10 +1,8 @@
 name: Update Site from Google Drive CSV
-
 on:
   schedule:
     - cron: '30 9 * * *'
   workflow_dispatch:
-
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -15,7 +13,7 @@ jobs:
       
       - name: Download CSV from Google Drive
         run: |
-          curl -L "https://drive.google.com/uc?export=download&id=19j0o-UE_ghGegA1TKDQuDOdNIPbmS_Gl" -o plugin_data.csv
+          curl -L "https://drive.google.com/uc?export=download&id=12vj3b4kJ2IA_Gsobe3sC5lGHmWLyTK6U" -o plugin_data.csv
       
       - name: Setup Python
         uses: actions/setup-python@v5
