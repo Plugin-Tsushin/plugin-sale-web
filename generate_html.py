@@ -15,7 +15,7 @@ encodings = ['utf-8', 'cp932', 'shift_jis', 'utf-8-sig']
 
 for encoding in encodings:
     try:
-        with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
+        with open('plugin_data_SNS.csv', 'r', encoding=encoding, errors='replace') as f:
             content = f.read()
             if 'プラグイン名' in content or 'セール価格' in content:
                 break
@@ -87,7 +87,7 @@ def is_beginner(name):
     name_lower = name.lower()
     return any(b in name_lower for b in BEGINNER_PLUGINS)
 
-with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
+with open('plugin_data_SNS.csv', 'r', encoding=encoding, errors='replace') as f:
     reader = csv.DictReader(f)
     for row in reader:
         keys = list(row.keys())
