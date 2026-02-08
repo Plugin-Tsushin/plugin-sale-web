@@ -1,4 +1,4 @@
-name: Update Site from Google Drive CSV
+name: Update Site from Scraper CSV
 on:
   schedule:
     - cron: '0 3 * * *'
@@ -12,9 +12,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Download CSV from Google Drive
+      - name: Download CSV from scraper repository
         run: |
-          curl -L "https://drive.google.com/uc?export=download&id=1LT9zzITXDHDpci8a-NJanzg8zG2o261N" -o plugin_data_SNS.csv
+          curl -L "https://raw.githubusercontent.com/Plugin-Tsushin/plugin-boutique-scraper/main/output/plugin_data.csv" -o plugin_data.csv
+          echo "--- CSV preview ---"
+          head -5 plugin_data.csv
       
       - name: Setup Python
         uses: actions/setup-python@v5

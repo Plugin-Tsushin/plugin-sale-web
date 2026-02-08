@@ -3,6 +3,9 @@ import json
 import re
 from datetime import datetime, timezone, timedelta
 
+# 為替レート（ドル→円）
+USD_TO_JPY = 150
+
 # 日本時間を取得
 JST = timezone(timedelta(hours=9))
 now_jst = datetime.now(JST)
@@ -15,19 +18,42 @@ encodings = ['utf-8', 'cp932', 'shift_jis', 'utf-8-sig']
 
 for encoding in encodings:
     try:
-        with open('plugin_data_SNS.csv', 'r', encoding=encoding, errors='replace') as f:
+        with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
             content = f.read()
             if 'プラグイン名' in content or 'セール価格' in content:
                 break
     except:
         continue
 
+def parse_dollar_price(price_str):
+    """ドル建て価格文字列を円に変換して整数で返す"""
+    if not price_str:
+        return 0
+    cleaned = re.sub(r'[^\d.]', '', str(price_str).replace(',', ''))
+    try:
+        usd = float(cleaned)
+        return int(round(usd * USD_TO_JPY))
+    except (ValueError, TypeError):
+        return 0
+
+def parse_dollar_raw(price_str):
+    """ドル建て価格文字列からドル金額を取得"""
+    if not price_str:
+        return 0.0
+    cleaned = re.sub(r'[^\d.]', '', str(price_str).replace(',', ''))
+    try:
+        return float(cleaned)
+    except (ValueError, TypeError):
+        return 0.0
+
 # 定番プラグインリスト
 POPULAR_PLUGINS = [
-    'melodyne', 'ozone', 'neutron', 'fabfilter', 'ssl', 'waves', 
+    'melodyne', 'ozone', 'neutron', 'fabfilter', 'ssl', 'waves',
     'izotope', 'soundtoys', 'valhalla', 'serum', 'omnisphere',
     'kontakt', 'massive', 'spire', 'diva', 'pro-q', 'pro-l',
-    'soothe', 'gullfoss', 'trackspacer', 'oxford', 'sonnox'
+    'soothe', 'gullfoss', 'trackspacer', 'oxford', 'sonnox',
+    'uad', 'amplitube', 'scaler', 'modo bass', 'xpand',
+    'weiss', 'tube tech', 'empirical labs', 'neoverb'
 ]
 
 # 初心者向けプラグインリスト
@@ -76,6 +102,16 @@ def get_category(name):
         return {'icon': '🎼', 'label': 'コード補助', 'target': '作曲向け'}
     elif 'metering' in name_lower or 'meter' in name_lower:
         return {'icon': '📈', 'label': 'メーター', 'target': 'ミキシング向け'}
+    elif 'zenology' in name_lower:
+        return {'icon': '🎹', 'label': 'シンセ', 'target': '作曲向け'}
+    elif 'comeback kid' in name_lower:
+        return {'icon': '⏱️', 'label': 'ディレイ', 'target': 'ミキシング向け'}
+    elif 'neoverb' in name_lower:
+        return {'icon': '🌊', 'label': 'リバーブ', 'target': 'ミキシング向け'}
+    elif 'trash' in name_lower:
+        return {'icon': '🔥', 'label': 'サチュレーション', 'target': 'サウンドデザイン向け'}
+    elif 'sound city' in name_lower:
+        return {'icon': '🎸', 'label': 'ギター', 'target': 'ギタリスト向け'}
     else:
         return {'icon': '🎵', 'label': 'エフェクト', 'target': 'ミキシング向け'}
 
@@ -87,32 +123,41 @@ def is_beginner(name):
     name_lower = name.lower()
     return any(b in name_lower for b in BEGINNER_PLUGINS)
 
-with open('plugin_data_SNS.csv', 'r', encoding=encoding, errors='replace') as f:
+with open('plugin_data.csv', 'r', encoding=encoding, errors='replace') as f:
     reader = csv.DictReader(f)
     for row in reader:
         keys = list(row.keys())
-        
+
         name = row.get('プラグイン名', row.get(keys[0], '')) if keys else ''
         sale_price_str = row.get('セール価格', row.get(keys[1], '0')) if len(keys) > 1 else '0'
         original_price_str = row.get('定価', row.get(keys[2], '')) if len(keys) > 2 else ''
         discount = row.get('セール率', row.get(keys[3], '')) if len(keys) > 3 else ''
         end_date = row.get('終了日', row.get(keys[4], '')) if len(keys) > 4 else ''
         product_url = row.get('商品URL', row.get(keys[5], '')) if len(keys) > 5 else ''
-        image_url = row.get('画像URL', row.get(keys[6], '')) if len(keys) > 6 else ''
-        
-        sale_price = int(''.join(filter(str.isdigit, str(sale_price_str)))) if sale_price_str else 0
-        original_price = int(''.join(filter(str.isdigit, str(original_price_str)))) if original_price_str else 0
+        image_url = ''
+
+        # ドル建て価格を円に換算
+        sale_price = parse_dollar_price(sale_price_str)
+        original_price = parse_dollar_price(original_price_str)
+        sale_usd = parse_dollar_raw(sale_price_str)
+        original_usd = parse_dollar_raw(original_price_str)
         savings = original_price - sale_price if original_price > sale_price else 0
-        
+
         discount_match = re.search(r'(\d+)%', str(discount))
         discount_percent = int(discount_match.group(1)) if discount_match else 0
-        
+
+        # 終了日に "Ends" プレフィックスがなければ付与
+        if end_date and not end_date.strip().startswith('Ends'):
+            end_date = 'Ends ' + end_date.strip()
+
         category = get_category(name)
-        
+
         sales_data.append({
             'name': name,
             'salePrice': sale_price,
             'originalPrice': original_price,
+            'saleUsd': sale_usd,
+            'originalUsd': original_usd,
             'savings': savings,
             'discountPercent': discount_percent,
             'endDate': end_date,
@@ -214,6 +259,18 @@ html = '''<!DOCTYPE html>
         .update-time span {
             color: #22c55e;
             font-weight: 500;
+        }
+
+        .rate-note {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .price-usd {
+            font-size: 12px;
+            color: #888;
+            margin-left: 2px;
         }
         
         .container {
@@ -528,6 +585,7 @@ html = '''<!DOCTYPE html>
         <h1>🎹 DTMプラグインセール情報</h1>
         <p>Plugin Boutique のセール情報を毎日自動更新</p>
         <div class="update-time">🕐 最終更新: <span>''' + update_time + '''</span></div>
+        <div class="rate-note">※ 日本円は参考価格（$1 = ¥''' + str(USD_TO_JPY) + '''換算）。正確な価格はリンク先でご確認ください</div>
     </header>
     
     <main class="container">
@@ -565,12 +623,16 @@ html = '''<!DOCTYPE html>
                     <h3>Q. セール価格はいつまでですか？</h3>
                     <p>A. 各製品に「残り○日」と表示しています。終了日を過ぎると通常価格に戻るため、お早めの購入をおすすめします。</p>
                 </article>
+                <article class="faq-item">
+                    <h3>Q. 日本円の価格は正確ですか？</h3>
+                    <p>A. 表示している日本円は$1 = ¥''' + str(USD_TO_JPY) + '''で換算した参考価格です。実際の請求額は決済時の為替レートやカード会社の手数料により異なります。正確な価格はリンク先のPlugin Boutiqueでご確認ください。</p>
+                </article>
             </div>
         </section>
     </main>
     
     <footer class="footer">
-        <p>データ: <a href="https://www.pluginboutique.com/" target="_blank" rel="noopener">Plugin Boutique</a> | 価格は変動する場合があります</p>
+        <p>データ: <a href="https://www.pluginboutique.com/" target="_blank" rel="noopener">Plugin Boutique</a> | 価格は変動する場合があります | 円換算は参考値です</p>
     </footer>
     
     <script>
@@ -578,7 +640,7 @@ html = '''<!DOCTYPE html>
         
         function parseEndDate(dateStr) {
             if (!dateStr) return new Date('2099-12-31');
-            const match = dateStr.match(/Ends\\s+(\\d+)\\s+(\\w+)/);
+            const match = dateStr.match(/(?:Ends\\s+)?(\\d+)\\s+(\\w+)/);
             if (!match) return new Date('2099-12-31');
             const day = parseInt(match[1]);
             const monthStr = match[2];
@@ -636,6 +698,7 @@ html = '''<!DOCTYPE html>
                         '<div class="deal-meta">' +
                             '<div class="deal-prices">' +
                                 '<span class="price-sale">¥' + deal.salePrice.toLocaleString() + '</span>' +
+                                '<span class="price-usd">($' + deal.saleUsd.toFixed(2) + ')</span>' +
                                 '<span class="price-original">¥' + deal.originalPrice.toLocaleString() + '</span>' +
                             '</div>' +
                             '<span class="deal-savings">¥' + deal.savings.toLocaleString() + ' お得</span>' +
